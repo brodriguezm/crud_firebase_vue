@@ -129,13 +129,13 @@
           <td>{{student.email}}</td>
           <td>{{student.web}}</td>
           <td>
-            <button class="btn btn-floating" @click="getStudent(student)">
+            <button class="btn btn-floating" @click="getStudent(student,'edit')">
               <i class="material-icons">edit</i>
               </span>
             </button>
           </td>
           <td>
-            <button class="btn btn-floating">
+            <button class="btn btn-floating" @click="getStudent(student,'delete')">
               <i class="material-icons">delete</i>
             </button>
           </td>
@@ -217,6 +217,38 @@
         </div>
       </section>
     </transition>
+    <transition name="fade">
+      <section :class="['ModalWindow', displayDeleteModal]" @submit.prevent="deleteStudent">
+        <div class="ModalWindow-container">
+          <header class="ModalWindow-heading">
+            <div class="row valign-wrapper">
+              <div class="col s10">
+                <h4 class="left">Eliminar Estudiante</h4>
+              </div>
+              <div class="col s2">
+                <button class="btn btn-floating right" @click="toggleModal('delete')">
+                  <i class="material-icons">close</i>
+                </button>
+              </div>
+            </div>
+          </header>
+          <form class="ModalWindow-content row">
+            <div class="input-field col s12">
+              <p class="flow-text center">¿Estás seguro de eliminar al estudiante: <b>{{activeStudent.name}}</b>.</p>
+              <input v-model="activeStudent.id" name="id" type="hidden" required>
+            </div>
+            <div class="input-field col s4 offset-s4">
+              <button class="btn-large btn-floating left" type="submit">
+                <i class="material-icons">check</i>
+              </button>
+              <button class="btn-large btn-floating right" type="button" @click="toggleModal('delete')">
+                <i class="material-icons">close</i>
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </transition>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/vue"></script>
@@ -232,7 +264,7 @@ const mv = new Vue({
         errorMessage: '',
         successMessage: '',
         students: [],
-        activeStudent: []
+        activeStudent: {}
     },
     mounted(){
         this.getAllStudents()
@@ -304,10 +336,10 @@ const mv = new Vue({
                 this.setMessages(res)
             })
         },
-        getStudent(student){
-            //console.log('id '+student.id);
+        getStudent(student, action){
             this.activeStudent = student
-            this.toggleModal('edit')
+            this.toggleModal(action)
+            
         },
         updateStudent(e){
             axios.post('./api.php?action=update', new FormData(e.target))
@@ -316,8 +348,12 @@ const mv = new Vue({
                 this.setMessages(res)
             })
         },
-        deleteStundet(){
-
+        deleteStudent(e){
+            axios.post('./api.php?action=delete', new FormData(e.target))
+            .then(res=>{
+                this.toggleModal('delete')
+                this.setMessages(res)
+            })
         }
     }
 })
