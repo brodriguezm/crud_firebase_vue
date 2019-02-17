@@ -129,7 +129,7 @@
           <td>{{student.email}}</td>
           <td>{{student.web}}</td>
           <td>
-            <button class="btn btn-floating">
+            <button class="btn btn-floating" @click="getStudent(student)">
               <i class="material-icons">edit</i>
               </span>
             </button>
@@ -179,6 +179,44 @@
         </div>
       </section>
     </transition>
+    <transition name="fade">
+      <section :class="['ModalWindow', displayEditModal]" v-if="showEditModal">
+        <div class="ModalWindow-container">
+          <header class="ModalWindow-heading">
+            <div class="row valign-wrapper">
+              <div class="col s10">
+                <h4 class="left">Editar Estudiante</h4>
+              </div>
+              <div class="col s2">
+                <button class="btn btn-floating right" @click="toggleModal('edit')">
+                  <i class="material-icons">close</i>
+                </button>
+              </div>
+            </div>
+          </header>
+          <form class="ModalWindow-content row" @submit.prevent="updateStudent">
+            <div class="input-field col s12">
+              <i class="material-icons prefix">account_circle</i>
+              <input v-model="activeStudent.name" name="name" type="text" placeholder="Nombre" required>
+            </div>
+            <div class="input-field col s12">
+              <i class="material-icons prefix">email</i>
+              <input v-model="activeStudent.email" name="email" type="text" placeholder="Correo" required>
+            </div>
+            <div class="input-field col s12">
+              <i class="material-icons prefix">web</i>
+              <input v-model="activeStudent.web" name="web" type="text" placeholder="Web" required>
+            </div>
+            <div class="input-field col s12">
+              <button class="btn-large btn-floating right" type="submit">
+                <i class="material-icons">save</i>
+              </button>
+              <input v-model="activeStudent.id" name="id" type="hidden" required>
+            </div>
+          </form>
+        </div>
+      </section>
+    </transition>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/vue"></script>
@@ -194,7 +232,7 @@ const mv = new Vue({
         errorMessage: '',
         successMessage: '',
         students: [],
-        activeStudents: []
+        activeStudent: []
     },
     mounted(){
         this.getAllStudents()
@@ -253,7 +291,7 @@ const mv = new Vue({
                 //         'web' => data.students.web
                 //     )
                 //     this.students.push(student)    
-                // }
+                // } 
                 this.students = res.data.students
 
             })
@@ -266,11 +304,17 @@ const mv = new Vue({
                 this.setMessages(res)
             })
         },
-        getStudent(){
-
+        getStudent(student){
+            //console.log('id '+student.id);
+            this.activeStudent = student
+            this.toggleModal('edit')
         },
-        updateStudent(){
-
+        updateStudent(e){
+            axios.post('./api.php?action=update', new FormData(e.target))
+            .then(res=>{
+                this.toggleModal('update')
+                this.setMessages(res)
+            })
         },
         deleteStundet(){
 
