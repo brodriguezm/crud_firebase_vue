@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>Vue</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <style>
@@ -86,7 +86,7 @@
     </section>
     <section class="row">
       <div class="col s12">
-        <h4>(VUE + PHP + MySQL)</h4>
+        <h4>(VUE + FIREBASE)</h4>
       </div>
     </section>
     <section class="row valign-wrapper">
@@ -120,8 +120,8 @@
           <th>Editar</th>
           <th>Borrar</th>
         </tr>
-        <tr v-for="student in students" v-key="student.id">
-          <td>{{student.id}}</td>
+        <tr v-for="student in vueStudents" v-key="student['.key']">
+          <td>{{student['.key']}}</td>
           <td>{{student.name}}</td>
           <td>{{student.email}}</td>
           <td>{{student.web}}</td>
@@ -208,7 +208,7 @@
               <button class="btn-large btn-floating right" type="submit">
                 <i class="material-icons">save</i>
               </button>
-              <input v-model="activeStudent.id" name="id" type="hidden" required>
+              <input v-model="activeStudent['.key']" name="id" type="hidden" required>
             </div>
           </form>
         </div>
@@ -232,7 +232,7 @@
           <form class="ModalWindow-content row">
             <div class="input-field col s12">
               <p class="flow-text center">¿Estás seguro de eliminar al estudiante: <b>{{activeStudent.name}}</b>.</p>
-              <input v-model="activeStudent.id" name="id" type="hidden" required>
+              <input v-model="activeStudent['.key']" name="id" type="hidden" required>
             </div>
             <div class="input-field col s4 offset-s4">
               <button class="btn-large btn-floating left" type="submit">
@@ -250,7 +250,23 @@
 
 <script src="https://cdn.jsdelivr.net/npm/vue"></script>
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/5.8.3/firebase.js"></script>
+<script src="https://unpkg.com/vuefire/dist/vuefire.js"></script> 
 <script>
+
+Vue.use(VueFire)
+// Initialize Firebase
+const config = {
+    apiKey: "AIzaSyC88WuJQ3WrVYIvEbJT2PexG6sJUuwh1zU",
+    authDomain: "crud-vue-firebase-9057a.firebaseapp.com",
+    databaseURL: "https://crud-vue-firebase-9057a.firebaseio.com",
+    projectId: "crud-vue-firebase-9057a",
+    storageBucket: "crud-vue-firebase-9057a.appspot.com",
+    messagingSenderId: "474201554732"
+  },
+  firebaseApp = firebase.initializeApp(config),
+  db = firebaseApp.database(),
+  dbRef = db.ref('vueStudents')
 
 const mv = new Vue({
     el: '#app',
@@ -263,8 +279,8 @@ const mv = new Vue({
         students: [],
         activeStudent: {}
     },
-    mounted(){
-        this.getAllStudents()
+    firebase: {
+      vueStudents: dbRef
     },
     computed: {
         displayAddModal(){
@@ -289,49 +305,35 @@ const mv = new Vue({
                 this.showDeleteModal = !this.showDeleteModal
             }
         },
-        setMessages(res){
-            if(res.data.error !== undefined){
-                if(res.data.error){
-                    this.errorMessage = res.data.message
-                }
-                else{
-                    this.successMessage = res.data.message
-                    this.getAllStudents()
-                }
-            }
-            else{
-                this.errorMessage = 'Error en la conexión'
-            }
+        setMessages(error, res){
+          if(error){
+            this.errorMessage = res
+          }
+          else{
+            this.successMessage = res
+          }
             
-
-            setTimeout(() => {
-                this.errorMessage = false 
-                this.successMessage = false
-            }, 3000);
-        },
-        getAllStudents(){
-            axios.post('./api.php?action=read')
-            .then(res=>{
-                // for(data in res.data){
-                //     student = array(
-                //         'id' => data.students.id,
-                //         'name' => data.students.name,
-                //         'email' => data.students.email,
-                //         'web' => data.students.web
-                //     )
-                //     this.students.push(student)    
-                // } 
-                this.students = res.data.students
-
-            })
+          setTimeout(() => {
+              this.errorMessage = false 
+              this.successMessage = false
+          }, 3000);
         },
         createStudent(e){
-            axios.post('./api.php?action=create',new FormData(e.target))
-            .then(res=>{
-                console.log(res)
-                this.toggleModal('add')
-                this.setMessages(res)
-            })
+          let formData = new FormData(e.target)
+          dbRef.push({
+            name: formData.get('name'),
+            email: formData.get('email'),
+            web: formData.get('web')
+          })
+          .then(res=>{
+            this.setMessages(false, 'Estudiante agregado con éxito')
+          })
+          .catch(err=>{
+            this.setMessages(true, 'Error al tratar de agregar estudiante')
+          })
+
+          e.target.reset()
+          this.toggleModal('add')
         },
         getStudent(student, action){
             this.activeStudent = student
