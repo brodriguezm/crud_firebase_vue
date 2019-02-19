@@ -76,20 +76,17 @@
 <body>
 <main id="app" class="container  center">
     <section class="row valign-wrapper">
-      <div class="col s12 m3">
-        <img class="responsive-img" src="https://vuejs.org/images/logo.png" alt="Vue.js">
+      <div class="col s12 m5" style="text-align:right;margin-top:30px;">
+        <img class="responsive-img" src="https://vuejs.org/images/logo.png" alt="Vue.js" width="80">
       </div>
-      <div class="col s12 m6">
+      <div class="col s12 m6" style="text-align:left;">
         <h1>CRUD</h1>
-        <h5>(PHP + MySQL)</h5>
-      </div>
-      <div class="col s12 m3">
-        <img class="responsive-img" src="https://ed.team/themes/custom/escueladigital/img/EDteam-logo.svg" alt="EDteam">
+        <!-- <h5>(PHP + MySQL)</h5> -->
       </div>
     </section>
     <section class="row">
       <div class="col s12">
-        <h4>Curso de Vue.js desde cero</h4>
+        <h4>(VUE + PHP + MySQL)</h4>
       </div>
     </section>
     <section class="row valign-wrapper">
