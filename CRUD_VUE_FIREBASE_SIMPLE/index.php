@@ -76,12 +76,15 @@
 <body>
 <main id="app" class="container  center">
     <section class="row valign-wrapper">
-      <div class="col s12 m5" style="text-align:right;margin-top:30px;">
+      <div class="col s12 m4" style="text-align:right;margin-top:30px;">
         <img class="responsive-img" src="https://vuejs.org/images/logo.png" alt="Vue.js" width="80">
       </div>
-      <div class="col s12 m6" style="text-align:left;">
+      <div class="col s12 m4" style="text-align:center;">
         <h1>CRUD</h1>
         <!-- <h5>(PHP + MySQL)</h5> -->
+      </div>
+      <div class="col s12 m4" style="text-align:left;margin-top:30px;">
+        <img class="responsive-img" src="https://ih0.redbubble.net/image.489553250.2202/flat,550x550,075,f.jpg" alt="Vue.js" width="100">
       </div>
     </section>
     <section class="row">
@@ -341,18 +344,34 @@ const mv = new Vue({
             
         },
         updateStudent(e){
-            axios.post('./api.php?action=update', new FormData(e.target))
-            .then(res=>{
-                this.toggleModal('update')
-                this.setMessages(res)
-            })
+          let formData = new FormData(e.target)
+          dbRef.child(formData.get('id')).update({
+            name: formData.get('name'),
+            email: formData.get('email'),
+            web: formData.get('web')
+          })
+          .then(res=>{
+            this.setMessages(false, 'Estudiante actualizado con éxito')
+          })
+          .catch(err=>{
+            this.setMessages(true, 'Error al tratar de actualizar el estudiante')
+          })
+
+          e.target.reset()
+          this.toggleModal('edit')
         },
         deleteStudent(e){
-            axios.post('./api.php?action=delete', new FormData(e.target))
-            .then(res=>{
-                this.toggleModal('delete')
-                this.setMessages(res)
-            })
+          let formData = new FormData(e.target)
+          dbRef.child(formData.get('id')).remove()
+          .then(res=>{
+            this.setMessages(false, 'Estudiante eliminado con éxito')
+          })
+          .catch(err=>{
+            this.setMessages(true, 'Error al tratar de eliminar el estudiante')
+          })
+
+          e.target.reset()
+          this.toggleModal('delete')
         }
     }
 })
